@@ -1,6 +1,22 @@
-# Self Model SOP
-
-中文/领域大模型训练全流程工具包
+<div align="center">
+  <img src="assets/logo.png" alt="Genesis-LLM Logo" width="400">
+  
+  <h1>Genesis-LLM</h1>
+  
+  <p><strong>中文/领域大模型训练全流程工具包</strong></p>
+  
+  <p>
+    <a href="#快速开始">快速开始</a> •
+    <a href="#功能模块">功能模块</a> •
+    <a href="#项目结构">项目结构</a> •
+    <a href="https://github.com/likebeans/Genesis-LLM">GitHub</a>
+  </p>
+  
+  ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+  ![PyTorch](https://img.shields.io/badge/PyTorch-2.1+-red.svg)
+  ![Transformers](https://img.shields.io/badge/Transformers-4.40+-yellow.svg)
+  ![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)
+</div>
 
 ---
 
@@ -24,7 +40,21 @@
 
 ## 项目简介
 
-<!-- TODO: 添加项目背景、目标、适用场景 -->
+**Genesis-LLM** 是一个完整的大语言模型训练工具包，专为中文和领域特定模型开发设计。项目覆盖从数据采集、词表扩充、模型训练到推理部署的全流程。
+
+### 核心特性
+
+- **数据处理管线** - HuggingFace 数据集采集、清洗、去重、质量筛选
+- **词表扩充** - 中文/领域词表训练与合并，Embedding 扩展
+- **高效微调** - 支持 LoRA/QLoRA 参数高效微调，显存占用低
+- **RLHF 对齐** - 支持 DPO、PPO、GRPO 等对齐算法
+- **配置驱动** - 所有参数通过 YAML 配置管理，易于复现
+- **实验追踪** - 集成 WandB / SwanLab 实时监控
+- **推理部署** - vLLM 高性能推理、llama.cpp 边缘部署、AWQ/GPTQ 量化
+
+### 技术栈
+
+`Python 3.10+` · `PyTorch 2.1+` · `Transformers` · `PEFT` · `SentencePiece` · `Datasets` · `Accelerate` · `vLLM`
 
 ---
 
