@@ -1,0 +1,26 @@
+[project]
+name = "self-model-sop"
+version = "0.1.0"
+description = "中文/领域大模型训练全流程工具包：数据处理、词表扩充、SFT、RLHF、推理部署"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "accelerate>=1.12.0",
+    "datasets>=4.4.1",
+    "llama-cpp-python",
+    "packaging>=21.0",
+    "peft>=0.18.0",
+    "pyyaml>=6.0.3",
+    "sentencepiece>=0.2.1",
+    "swanlab>=0.7.2",
+    "torch>=2.1.0",
+    "transformers>=4.57.3",
+    "trl>=0.25.1",
+    "wandb>=0.23.0",
+]
+
+[project.optional-dependencies]
+# DeepSpeed 分布式训练加速（需要编译，按需安装）
+distributed = [
+    "deepspeed>=0.12.0",
+]

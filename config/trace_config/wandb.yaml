@@ -1,0 +1,130 @@
+# ============================================================
+# Weights & Biases (WandB) 实验追踪配置
+# ============================================================
+# 用途：配置 WandB 实验追踪系统
+# 使用场景：
+#   - 训练脚本通过 --trace wandb 启用
+#   - 自动记录训练指标（loss, lr, 梯度等）
+#   - 支持团队协作和实验对比
+# 官网：https://wandb.ai/
+# 文档：https://docs.wandb.ai/
+# ============================================================
+
+# W&B 项目名称
+# 说明：在 WandB 平台上显示的项目名称
+# 格式：字符串，支持字母、数字、下划线、连字符
+# 示例：medical-sft, legal-pretrain, qwen-finetune
+# 访问地址：https://wandb.ai/{entity}/{project}
+project: test
+
+# W&B 团队/用户名（entity）
+# 说明：WandB 账号的用户名或团队名
+# 获取方式：登录 https://wandb.ai/ 后在右上角查看
+# 示例：个人账号用户名，或团队名称
+entity: yufeifandd-notion
+
+# W&B API 密钥
+# 说明：用于身份验证，避免交互式登录
+# 获取方式：https://wandb.ai/settings → API keys → 复制
+# 安全提示：
+#   - 这是敏感信息，不要提交到公开仓库
+#   - 建议使用环境变量：export WANDB_API_KEY="your_key"
+#   - 或使用 .env 文件（加入 .gitignore）
+# 如果留空，脚本会从环境变量 WANDB_API_KEY 读取
+api_key: "09d85cc2b030af20e514119460e9b373ffd8d7da"
+
+# 运行模式
+# 可选值：
+#   - online：实时上传数据到 WandB 云端（需要网络）
+#   - offline：本地保存数据，稍后手动同步
+#   - disabled：完全禁用 WandB（不记录任何数据）
+# 推荐：
+#   - 正式训练：online
+#   - 调试/测试：offline 或 disabled
+#   - 无网络环境：offline
+mode: online
+
+# W&B API 地址（可选）
+# 说明：用于自托管 WandB 服务器
+# 默认值：https://api.wandb.ai（SaaS 云服务）
+# 自托管：改为你的 WandB Server 地址
+# 示例：https://wandb.your-company.com/api
+# 注意：使用默认 SaaS 服务时可以注释掉此行
+# base_url: https://api.wandb.ai
+
+# 实验运行名称
+# 说明：在 WandB 界面中显示的运行名称
+# 格式：字符串，建议包含模型、任务、日期等信息
+# 示例：
+#   - qwen2-medical-sft-20231127
+#   - llama2-7b-lora-r16
+#   - bert-pretrain-epoch3
+# 提示：如果不设置，WandB 会自动生成随机名称
+run_name: qwen2-medical-sft
+
+# 实验描述/备注
+# 说明：详细描述本次实验的目的、方法、特殊设置等
+# 用途：方便后续查看和对比实验
+# 示例：
+#   - "Qwen2.5-0.5B 在医疗数据上的 SFT，使用 LoRA r=8"
+#   - "测试不同学习率对收敛速度的影响"
+#   - "baseline 实验，用于后续对比"
+notes: "Qwen2.5-0.5B medical SFT with LoRA"
+
+# 实验标签
+# 说明：用于分类和筛选实验
+# 格式：字符串列表
+# 用途：
+#   - 在 WandB 界面中按标签筛选实验
+#   - 批量管理相关实验
+# 建议标签类别：
+#   - 模型系列：qwen2.5, llama2, bert
+#   - 训练方法：lora, qlora, full-finetune
+#   - 任务领域：medical, legal, finance
+#   - 实验阶段：baseline, ablation, final
+# 示例：["qwen2.5", "lora", "medical", "baseline"]
+tags: ["qwen2.5", "lora", "medical"]
+
+# ------------------------------------------------------------
+# 其他可选配置（按需取消注释）
+# ------------------------------------------------------------
+
+# # 实验分组
+# # 说明：将多个相关实验分组显示
+# # 用途：对比同一组实验的不同超参数设置
+# group: "medical-sft-experiments"
+
+# # 实验任务类型
+# # 说明：标识实验的任务类型
+# # 示例：classification, generation, translation
+# job_type: "fine-tuning"
+
+# # 是否保存代码
+# # 说明：自动保存训练脚本到 WandB
+# # 推荐：true（便于复现）
+# save_code: true
+
+# # 是否记录系统指标
+# # 说明：记录 CPU、GPU、内存使用情况
+# # 推荐：true
+# log_system: true
+
+# # 是否记录梯度
+# # 说明：记录模型梯度的统计信息
+# # 注意：会增加日志大小和上传时间
+# log_gradients: false
+
+# # 是否记录模型参数
+# # 说明：记录模型参数的统计信息
+# # 注意：会增加日志大小
+# log_parameters: false
+
+# # 日志记录频率（步数）
+# # 说明：每隔多少步记录一次日志
+# # 默认：由训练脚本的 logging_steps 控制
+# # log_freq: 50
+
+# # 是否静默模式
+# # 说明：减少终端输出
+# # 推荐：false（便于调试）
+# silent: false

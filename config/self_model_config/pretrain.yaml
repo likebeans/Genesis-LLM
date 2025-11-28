@@ -1,0 +1,51 @@
+# ============================================================
+# CPT（继续预训练）基础配置模板
+# ============================================================
+# 使用方式：
+#   uv run python self_model/pretrain/train_pretrain.py \
+#     --config config/self_model_config/pretrain.yaml
+# ============================================================
+
+# 模型配置
+model_name_or_path: Qwen/Qwen2.5-0.5B
+tokenizer_name_or_path: Qwen/Qwen2.5-0.5B
+
+# 数据配置
+data:
+  train_file: data_process/final_data/pretrain/shibing624_medical__train_clean.jsonl
+  eval_file: data_process/final_data/pretrain/shibing624_medical__validation_clean.jsonl
+  text_fields: [text]   # 依次尝试的字段，缺失时自动拼接 messages/conversations
+  block_size: 1024      # 分块长度（常用 512/1024/2048）
+
+# PEFT 配置（可选，默认全参 CPT）
+peft:
+  enabled: false
+  qlora: false
+  lora_r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj]
+
+# 实验追踪
+trace: swanlab
+trace_project: self-model-pretrain
+
+# 分布式训练（可选，取消注释启用）
+# deepspeed: config/self_model_config/deepspeed/ds_config.json
+
+# 训练参数
+training_args:
+  output_dir: self_model/checkpoints/pretrain
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 2
+  gradient_accumulation_steps: 4
+  num_train_epochs: 1
+  learning_rate: 2.0e-4
+  logging_steps: 50
+  save_steps: 1000
+  evaluation_strategy: "steps"
+  eval_steps: 1000
+  warmup_steps: 500
+  lr_scheduler_type: "cosine"
+  fp16: true
+  report_to: []

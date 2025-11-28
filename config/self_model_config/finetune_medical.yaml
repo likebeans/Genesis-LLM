@@ -1,0 +1,53 @@
+# ============================================================
+# 医疗领域 SFT 微调配置示例
+# ============================================================
+# 基于 finetune_base.yaml 模板，针对医疗领域数据进行微调
+# 
+# 使用方式：
+#   uv run python self_model/fine_tuning/train_finetune.py \
+#     --config config/self_model_config/finetune_medical.yaml
+# ============================================================
+
+# 模型配置
+model_name_or_path: Qwen/Qwen2.5-0.5B-Instruct
+tokenizer_name_or_path: Qwen/Qwen2.5-0.5B-Instruct
+template_path: self_model/template/qwen2_chatml.json
+
+# 数据配置 - 医疗数据集
+data:
+  train_file: data_process/final_data/finetune/shibing624_medical__train_clean.jsonl
+  eval_file: data_process/final_data/finetune/shibing624_medical__validation_clean.jsonl
+  max_length: 512
+
+# PEFT 配置
+peft:
+  enabled: true
+  qlora: false
+  lora_r: 16          # 医疗领域适当增大 LoRA 秩
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+# 实验追踪
+trace: swanlab
+trace_project: medical-sft
+
+# 训练参数
+training_args:
+  output_dir: self_model/checkpoints/finetune_medical
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 4
+  gradient_accumulation_steps: 8
+  num_train_epochs: 3
+  learning_rate: 1.0e-4
+  logging_steps: 20
+  save_steps: 200
+  evaluation_strategy: "steps"
+  eval_steps: 200
+  warmup_steps: 50
+  lr_scheduler_type: "cosine"
+  fp16: true
+  save_total_limit: 3
+  load_best_model_at_end: true
+  metric_for_best_model: "eval_loss"
+  report_to: []

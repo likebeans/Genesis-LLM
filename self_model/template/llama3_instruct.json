@@ -1,0 +1,12 @@
+{
+  "name": "Llama 3 / Llama 3.1 Instruct",
+  "messages": [
+    {"role": "system", "template": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system}<|eot_id|>"},
+    {"role": "user", "template": "<|start_header_id|>user<|end_header_id|>\n\n{input}<|eot_id|>"},
+    {"role": "assistant", "template": "<|start_header_id|>assistant<|end_header_id|>\n\n{output}<|eot_id|>"}
+  ],
+  "separator": "",
+  "stop_tokens": ["<|eot_id|>", "<|end_of_text|>"],
+  "bos_token": "<|begin_of_text|>",
+  "eos_token": "<|end_of_text|>"
+}

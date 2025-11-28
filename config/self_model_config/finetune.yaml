@@ -1,0 +1,57 @@
+# ============================================================
+# SFT 基础配置模板
+# ============================================================
+# 这是一个简洁的基础配置模板，包含最常用的参数
+# 用户可以复制此文件创建自己的配置，如：
+#   - finetune_medical.yaml（医疗领域微调）
+#   - finetune_legal.yaml（法律领域微调）
+#   - finetune_qlora.yaml（4bit 量化微调）
+#
+# 使用方式：
+#   uv run python self_model/fine_tuning/train_finetune.py \
+#     --config config/self_model_config/your_config.yaml
+# ============================================================
+
+# 模型配置
+model_name_or_path: Qwen/Qwen2.5-0.5B-Instruct
+tokenizer_name_or_path: Qwen/Qwen2.5-0.5B-Instruct
+template_path: self_model/template/qwen2_chatml.json
+
+# 数据配置
+data:
+  train_file: data_process/final_data/finetune/train.jsonl
+  eval_file: data_process/final_data/finetune/validation.jsonl
+  max_length: 512
+
+# PEFT 配置（LoRA）
+peft:
+  enabled: true
+  qlora: false
+  lora_r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj]
+
+# 实验追踪
+trace: swanlab
+trace_project: self-model
+
+# 分布式训练（可选，取消注释启用）
+# deepspeed: config/self_model_config/deepspeed/ds_config.json
+
+# 训练参数
+training_args:
+  output_dir: self_model/checkpoints/finetune
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 2
+  gradient_accumulation_steps: 4
+  num_train_epochs: 1
+  learning_rate: 5.0e-5
+  logging_steps: 50
+  save_steps: 500
+  evaluation_strategy: "steps"
+  eval_steps: 500
+  warmup_steps: 100
+  lr_scheduler_type: "cosine"
+  fp16: true
+  report_to: []

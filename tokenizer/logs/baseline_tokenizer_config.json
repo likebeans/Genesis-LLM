@@ -1,0 +1,43 @@
+{
+  "source_tokenizer": "bert-base-chinese",
+  "hf_endpoint": "https://hf-mirror.com",
+  "config_path": "config/model_config/config.yaml",
+  "trust_remote_code": false,
+  "tokenizer_class": "BertTokenizerFast",
+  "is_fast": true,
+  "vocab_size": 21128,
+  "len_tokenizer": 21128,
+  "model_max_length": 512,
+  "padding_side": "right",
+  "truncation_side": "right",
+  "clean_up_tokenization_spaces": false,
+  "special_tokens": {
+    "unk_token": "[UNK]",
+    "sep_token": "[SEP]",
+    "pad_token": "[PAD]",
+    "cls_token": "[CLS]",
+    "mask_token": "[MASK]"
+  },
+  "special_token_ids": {
+    "unk_token": 100,
+    "sep_token": 102,
+    "pad_token": 0,
+    "cls_token": 101,
+    "mask_token": 103
+  },
+  "additional_special_tokens": [],
+  "added_vocab_size": 5,
+  "sp_model_kwargs": null,
+  "init_kwargs": {
+    "do_lower_case": false,
+    "unk_token": "[UNK]",
+    "sep_token": "[SEP]",
+    "pad_token": "[PAD]",
+    "cls_token": "[CLS]",
+    "mask_token": "[MASK]",
+    "tokenize_chinese_chars": true,
+    "strip_accents": null,
+    "model_max_length": 512,
+    "name_or_path": "bert-base-chinese"
+  }
+}

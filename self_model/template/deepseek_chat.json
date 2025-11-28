@@ -1,0 +1,12 @@
+{
+  "name": "DeepSeek LLM Chat",
+  "messages": [
+    {"role": "system", "template": "<｜begin▁of▁sentence｜>{system}\n\n"},
+    {"role": "user", "template": "User: {content}\n\n"},
+    {"role": "assistant", "template": "Assistant: {content}<｜end▁of▁sentence｜>"}
+  ],
+  "separator": "",
+  "stop_tokens": ["<｜end▁of▁sentence｜>"],
+  "bos_token": "<｜begin▁of▁sentence｜>",
+  "eos_token": "<｜end▁of▁sentence｜>"
+}

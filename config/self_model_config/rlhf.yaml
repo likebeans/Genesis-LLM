@@ -1,0 +1,113 @@
+# ============================================================
+# RLHF - DPO 配置模板
+# ============================================================
+# 使用方式：
+#   uv run python self_model/rlhf/train_dpo.py \
+#     --config config/self_model_config/rlhf.yaml
+# ============================================================
+
+# 模型配置
+algorithm: dpo  # dpo / ppo / grpo
+model_name_or_path: self_model/checkpoints/finetune_merged   # 策略模型（合并后的全量权重）
+ref_model_name_or_path: self_model/checkpoints/finetune_merged  # 参考模型（可与策略相同）
+tokenizer_name_or_path: self_model/checkpoints/finetune_merged
+reward_model_name_or_path: ""  # PPO/GRPO 使用，填写奖励模型路径
+trust_remote_code: false
+
+# 数据配置
+data:
+  train_file: data_process/final_data/reward/shibing624_medical__train_clean.jsonl
+  eval_file: data_process/final_data/reward/shibing624_medical__validation_clean.jsonl
+  max_length: 1024
+
+# DPO 超参
+beta: 0.1
+loss_type: sigmoid   # 可选：sigmoid / ipo / pai
+
+# PEFT 配置（可选）
+peft:
+  enabled: false
+  qlora: false
+  lora_r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj]
+
+# 实验追踪
+trace: swanlab
+trace_project: self-model-rlhf
+
+# 分布式训练（可选）
+# deepspeed: config/self_model_config/deepspeed/ds_config.json
+
+# 训练参数
+training_args:
+  output_dir: self_model/checkpoints/rlhf
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 4
+  num_train_epochs: 1
+  learning_rate: 5.0e-6
+  logging_steps: 50
+  save_steps: 500
+  evaluation_strategy: "steps"
+  eval_steps: 500
+  warmup_steps: 100
+  lr_scheduler_type: "cosine"
+  fp16: true
+  report_to: []
+
+# ============================================================
+# PPO / GRPO（VERL）配置片段
+# ============================================================
+# 运行：
+#   uv run python self_model/rlhf/train_ppo.py  --config ...   # PPO
+#   uv run python self_model/rlhf/train_grpo.py --config ...   # GRPO
+ppo:
+  # 数据
+  train_file: data_process/final_data/reward/train.parquet
+  eval_file: data_process/final_data/reward/validation.parquet
+  prompt_key: prompt
+  max_prompt_length: 512
+  max_response_length: 512
+  train_batch_size: 1024
+  val_batch_size: 256
+
+  # rollout/推理引擎
+  rollout_backend: vllm      # vllm / hf / sglang
+  rollout_n: 1               # grpo 建议 >=4
+  rollout_tp: 1
+  rollout_gpu_memory_utilization: 0.6
+  load_format: hf            # hf / safetensors 等（取决于模型存储格式）
+  log_prob_micro_batch_size_per_gpu: 4
+
+  # 策略超参
+  actor_lr: 1.0e-6
+  ppo_epochs: 1
+  ppo_mini_batch_size: 256
+  ppo_micro_batch_size_per_gpu: 4
+  kl_loss_coef: 0.001
+  kl_loss_type: low_var_kl
+  use_kl_loss: false         # GRPO 会自动覆盖为 true
+  use_kl_in_reward: false
+  entropy_coeff: 0.0
+  kl_coef: 0.001
+  target_kl: 0.1
+  gradient_checkpointing: true
+  use_remove_padding: true
+
+  # 奖励模型
+  reward_micro_batch_size_per_gpu: 2
+  reward_max_length: 2048
+
+  # 日志 / 资源
+  logger: ["console"]        # console / wandb
+  project_name: self-model-ppo
+  experiment_name: ppo-demo
+  n_gpus_per_node: 1
+  nnodes: 1
+  total_epochs: 1
+  save_freq: 20
+  test_freq: 5
+  val_before_train: true
+  resume_mode: auto

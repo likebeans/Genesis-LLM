@@ -1,0 +1,12 @@
+{
+  "name": "ChatGLM3",
+  "messages": [
+    {"role": "system", "template": "[gMASK]sop<|system|>\n{system}"},
+    {"role": "user", "template": "<|user|>\n{content}"},
+    {"role": "assistant", "template": "<|assistant|>\n{content}"}
+  ],
+  "separator": "",
+  "stop_tokens": ["<|user|>", "<|observation|>", "</s>"],
+  "bos_token": "[gMASK]",
+  "eos_token": "</s>"
+}

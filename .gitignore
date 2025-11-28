@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Model weights and checkpoints (too large for git)
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.gguf
+self_model/checkpoints/
+tokenizer/merged_model/
+tokenizer/merged_model_mlm/
+tokenizer/mlm_tmp/
+
+# Tokenizer training artifacts
+tokenizer/aux_tokenizer/*.model
+tokenizer/aux_tokenizer/*.vocab
+tokenizer/data/tokenizer_data/
+
+# Data files
+data_process/fetch_data/
+data_process/final_data/
+*.parquet
+
+# Logs
+*.log
+wandb/
+swanlab-logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lock files (optional, can be committed)
+# uv.lock

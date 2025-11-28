@@ -1,0 +1,125 @@
+# ============================================================
+# SwanLab 实验追踪配置
+# ============================================================
+# 用途：配置 SwanLab 实验追踪系统（国内替代方案）
+# 使用场景：
+#   - 训练脚本通过 --trace swanlab 启用
+#   - 自动记录训练指标（loss, lr, 梯度等）
+#   - 支持 Transformers 4.50.0+ 原生集成
+#   - 国内访问速度快，中文界面友好
+# 官网：https://swanlab.cn/
+# 文档：https://docs.swanlab.cn/
+# ============================================================
+
+# SwanLab 项目名称
+# 说明：在 SwanLab 平台上显示的项目名称
+# 格式：字符串，支持中英文、数字、下划线、连字符
+# 示例：medical-sft, 医疗领域微调, qwen-finetune
+# 访问地址：https://swanlab.cn/@{workspace}/{project}
+project: self-model
+
+# SwanLab 工作空间
+# 说明：SwanLab 账号的工作空间名称
+# 获取方式：登录 https://swanlab.cn/ 后在个人设置中查看
+# 注意：工作空间必须先在 SwanLab 平台上创建
+# 示例：个人用户名或团队名称
+workspace: dd-y
+
+# SwanLab API 密钥
+# 说明：用于身份验证，避免交互式登录
+# 获取方式：https://swanlab.cn/settings → API 密钥 → 复制
+# 安全提示：
+#   - 这是敏感信息，不要提交到公开仓库
+#   - 建议使用环境变量：export SWANLAB_API_KEY="your_key"
+#   - 或使用 .env 文件（加入 .gitignore）
+# 如果留空，脚本会从环境变量 SWANLAB_API_KEY 读取
+api_key: "yeuBYctKH3dns8uVbqOsS"
+
+# SwanLab API 地址
+# 说明：SwanLab API 服务器地址
+# 默认值：https://api.swanlab.cn/api（SaaS 云服务）
+# 自托管：改为你的 SwanLab Server API 地址
+# 示例：https://swanlab.your-company.com/api
+api_host: https://api.swanlab.cn/api
+
+# SwanLab Web 界面地址
+# 说明：SwanLab Web 界面访问地址
+# 默认值：https://swanlab.cn（SaaS 云服务）
+# 自托管：改为你的 SwanLab Server Web 地址
+# 示例：https://swanlab.your-company.com
+web_host: https://swanlab.cn
+
+# 运行模式
+# 可选值：
+#   - cloud：云端模式，实时上传数据到 SwanLab 云端（需要网络）
+#   - offline：离线模式，本地保存数据，稍后手动同步
+#   - local：本地模式，仅在本地查看，不上传
+# 推荐：
+#   - 正式训练：cloud
+#   - 调试/测试：offline 或 local
+#   - 无网络环境：offline
+mode: cloud
+
+# 实验运行名称
+# 说明：在 SwanLab 界面中显示的运行名称
+# 格式：字符串，建议包含模型、任务、日期等信息
+# 示例：
+#   - qwen2-medical-sft-20231127
+#   - llama2-7b-lora-r16
+#   - 医疗领域-微调-实验01
+# 提示：如果不设置，SwanLab 会自动生成随机名称
+run_name: qwen2-medical-sft
+
+# 实验描述
+# 说明：详细描述本次实验的目的、方法、特殊设置等
+# 用途：方便后续查看和对比实验
+# 示例：
+#   - "Qwen2.5-0.5B 在医疗数据上的 SFT，使用 LoRA r=8"
+#   - "测试不同学习率对收敛速度的影响"
+#   - "基线实验，用于后续对比"
+description: "Qwen2.5-0.5B medical SFT with LoRA"
+
+# ------------------------------------------------------------
+# 其他可选配置（按需取消注释）
+# ------------------------------------------------------------
+
+# # 实验标签
+# # 说明：用于分类和筛选实验
+# # 格式：字符串列表
+# # 用途：
+# #   - 在 SwanLab 界面中按标签筛选实验
+# #   - 批量管理相关实验
+# # 建议标签类别：
+# #   - 模型系列：qwen2.5, llama2, bert
+# #   - 训练方法：lora, qlora, full-finetune
+# #   - 任务领域：medical, legal, finance
+# #   - 实验阶段：baseline, ablation, final
+# # 示例：["qwen2.5", "lora", "medical", "baseline"]
+# tags: ["qwen2.5", "lora", "medical"]
+
+# # 日志记录级别
+# # 可选值：debug / info / warning / error
+# # 说明：控制 SwanLab 的日志输出级别
+# # 推荐：info
+# log_level: "info"
+
+# # 是否保存代码
+# # 说明：自动保存训练脚本到 SwanLab
+# # 推荐：true（便于复现）
+# save_code: true
+
+# # 是否记录系统指标
+# # 说明：记录 CPU、GPU、内存使用情况
+# # 推荐：true
+# log_system: true
+
+# # 是否静默模式
+# # 说明：减少终端输出
+# # 推荐：false（便于调试）
+# silent: false
+
+# # 自动保存间隔（秒）
+# # 说明：每隔多少秒自动保存一次数据
+# # 默认：60 秒
+# # 建议：30-120 秒
+# save_interval: 60

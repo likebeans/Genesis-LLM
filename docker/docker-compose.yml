@@ -1,0 +1,64 @@
+# Docker Compose 配置
+# ============================================================
+# 用途：快速启动开发/训练环境
+#
+# 使用方式：
+#   docker-compose -f docker/docker-compose.yml up -d dev
+#   docker-compose -f docker/docker-compose.yml exec dev bash
+#
+# 服务说明：
+#   - dev: 开发/训练环境（支持 GPU）
+#   - vllm: vLLM 推理服务（可选）
+# ============================================================
+
+version: '3.8'
+
+services:
+  # 开发/训练环境
+  dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: self-model-sop:dev
+    container_name: self-model-dev
+    volumes:
+      - ..:/workspace
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # vLLM 推理服务（可选）
+  # 使用官方 vLLM 镜像，支持 OpenAI 兼容 API
+  vllm:
+    image: vllm/vllm-openai:latest
+    container_name: self-model-vllm
+    ports:
+      - "8000:8000"
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      - ../self_model/checkpoints:/models
+    environment:
+      - HF_HOME=/root/.cache/huggingface
+    command: >
+      --model /models/finetune_merged
+      --served-model-name self-model
+      --host 0.0.0.0
+      --port 8000
+      --trust-remote-code
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    profiles:
+      - inference  # 仅在指定 profile 时启动

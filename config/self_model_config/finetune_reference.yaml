@@ -1,0 +1,284 @@
+# ============================================================
+# 监督微调（SFT）配置文件
+# ============================================================
+# 用途：配置有监督微调（Supervised Fine-Tuning）的所有参数
+# 使用场景：
+#   - 在基座模型或 CPT 检查点上进行指令微调
+#   - 使用 LoRA/QLoRA 进行参数高效微调
+#   - 配合 WandB/SwanLab 进行实验追踪
+# 调用方式：
+#   uv run python self_model/fine_tuning/train_finetune.py \
+#     --config config/self_model_config/finetune.yaml \
+#     --trace swanlab
+# ============================================================
+
+# ------------------------------------------------------------
+# 模型配置
+# ------------------------------------------------------------
+
+# 基座模型路径或 HuggingFace 模型 ID
+# 说明：可以是本地路径或 HF Hub 上的模型名称
+# 示例：
+#   - Qwen/Qwen2.5-0.5B-Instruct（千问小模型）
+#   - Qwen/Qwen2.5-7B-Instruct（千问 7B）
+#   - meta-llama/Llama-2-7b-hf（LLaMA2）
+#   - tokenizer/merged_model_mlm（扩展词表后的本地模型）
+model_name_or_path: Qwen/Qwen2.5-0.5B-Instruct
+
+# Tokenizer 路径
+# 说明：通常与模型路径相同，除非使用了扩展词表
+# 如果进行了词表扩充，应指向扩展后的 tokenizer 路径
+# 示例：tokenizer/merged_tokenizer
+tokenizer_name_or_path: Qwen/Qwen2.5-0.5B-Instruct
+
+# 对话模板路径
+# 说明：定义 system/user/assistant 的格式化模板
+# 不同模型系列使用不同模板：
+#   - Qwen 系列：qwen2_chatml.json（ChatML 格式）
+#   - LLaMA3 系列：llama3_instruct.json
+#   - ChatGLM3：chatglm3.json（含 [gMASK]sop 前缀）
+#   - Baichuan2-Chat：baichuan2_chat.json（<reserved_106>/<reserved_107>）
+#   - DeepSeek-LLM-Chat：deepseek_chat.json（User/Assistant 前缀 + 特殊 bos/eos）
+#   - 自定义模板：参考 self_model/template/ 目录
+template_path: self_model/template/qwen2_chatml.json
+
+# HuggingFace 镜像地址（可选）
+# 说明：用于加速国内下载，留空则使用默认地址
+# 推荐：https://hf-mirror.com
+hf_endpoint: https://hf-mirror.com
+
+# ------------------------------------------------------------
+# 数据配置
+# ------------------------------------------------------------
+
+data:
+  # 训练数据文件路径
+  # 格式：JSONL，每行一个 JSON 对象，包含 input 和 output 字段
+  # 示例：{"input": "什么是糖尿病？", "output": "糖尿病是一种代谢性疾病..."}
+  train_file: data_process/final_data/finetune/shibing624_medical__train_clean.jsonl
+  
+  # 验证数据文件路径（可选）
+  # 说明：用于训练过程中的评估，格式同 train_file
+  # 如果不提供，则不进行验证
+  eval_file: data_process/final_data/finetune/shibing624_medical__validation_clean.jsonl
+  
+  # 最大序列长度
+  # 说明：超过此长度的文本会被截断
+  # 取值范围：128-4096，根据模型和显存调整
+  # 建议：
+  #   - 短对话：512
+  #   - 长文档：1024-2048
+  #   - 超长上下文：4096+（需要模型支持）
+  max_length: 512
+
+# ------------------------------------------------------------
+# PEFT（参数高效微调）配置
+# ------------------------------------------------------------
+
+peft:
+  # 是否启用 PEFT（LoRA/QLoRA）
+  # 说明：启用后只训练少量参数，大幅降低显存占用
+  # 推荐：显存 < 24GB 时启用
+  enabled: true
+  
+  # 是否使用 QLoRA（4bit 量化 + LoRA）
+  # 说明：进一步降低显存，但可能略微影响效果
+  # 推荐：显存 < 16GB 时启用
+  # 注意：需要安装 bitsandbytes 库
+  qlora: false
+  
+  # LoRA 秩（rank）
+  # 说明：控制 LoRA 矩阵的秩，影响参数量和表达能力
+  # 取值范围：4-64
+  # 推荐：
+  #   - 小模型（< 3B）：8-16
+  #   - 中模型（3-13B）：16-32
+  #   - 大模型（> 13B）：32-64
+  lora_r: 8
+  
+  # LoRA alpha 参数
+  # 说明：缩放因子，通常设为 lora_r 的 2 倍
+  # 公式：实际学习率 = base_lr * (lora_alpha / lora_r)
+  lora_alpha: 16
+  
+  # LoRA dropout 比例
+  # 说明：防止过拟合，通常设为 0.05-0.1
+  lora_dropout: 0.05
+  
+  # LoRA 目标模块
+  # 说明：指定对哪些模块应用 LoRA
+  # Qwen 系列常用模块：
+  #   - q_proj, k_proj, v_proj, o_proj（注意力层）
+  #   - gate_proj, up_proj, down_proj（FFN 层）
+  # LLaMA 系列类似，但可能有不同命名
+  # 建议：至少包含 q_proj, k_proj, v_proj
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+# ------------------------------------------------------------
+# 实验追踪配置
+# ------------------------------------------------------------
+
+# 追踪后端选择
+# 可选值：wandb / swanlab / none / 空字符串
+# 说明：
+#   - wandb：Weights & Biases（国际主流）
+#   - swanlab：SwanLab（国内替代）
+#   - none：禁用追踪
+#   - 空：使用默认（从 training_args.report_to 读取）
+# 命令行可覆盖：--trace wandb
+trace: swanlab
+
+# 追踪项目名称
+# 说明：在 WandB/SwanLab 中显示的项目名
+# 建议：使用有意义的名称，如 medical-sft, legal-finetune
+trace_project: self-model
+
+# ------------------------------------------------------------
+# 分布式训练配置
+# ------------------------------------------------------------
+
+# DeepSpeed 配置文件路径（可选）
+# 说明：启用 DeepSpeed 进行分布式训练加速和显存优化
+# 可选值：
+#   - config/self_model_config/deepspeed/ds_config.json（ZeRO-2，推荐）
+#   - config/self_model_config/deepspeed/ds_config_zero3.json（ZeRO-3，超大模型）
+#   - 留空或注释掉则不启用 DeepSpeed
+# 命令行可覆盖：--deepspeed config/self_model_config/deepspeed/ds_config.json
+# deepspeed: config/self_model_config/deepspeed/ds_config.json
+
+# ------------------------------------------------------------
+# 训练参数（Transformers TrainingArguments）
+# ------------------------------------------------------------
+
+training_args:
+  # 输出目录
+  # 说明：保存检查点、日志、最终模型的目录
+  # 建议：按任务分类，如 self_model/checkpoints/finetune_medical
+  output_dir: self_model/checkpoints/finetune
+  
+  # 每设备训练批次大小
+  # 说明：每张 GPU 上的 batch size
+  # 取值范围：1-32，根据显存和模型大小调整
+  # 显存参考（FP16，512 长度）：
+  #   - 0.5B 模型：8-16
+  #   - 7B 模型：1-4
+  #   - 13B 模型：1-2
+  per_device_train_batch_size: 2
+  
+  # 每设备验证批次大小
+  # 说明：验证时的 batch size，通常可以设大一些
+  per_device_eval_batch_size: 2
+  
+  # 梯度累积步数
+  # 说明：累积多少步后再更新参数
+  # 实际 batch size = per_device_train_batch_size * gradient_accumulation_steps * num_gpus
+  # 示例：2 * 4 * 1 = 8（等效 batch size）
+  gradient_accumulation_steps: 4
+  
+  # 训练轮数
+  # 说明：遍历整个训练集的次数
+  # 取值范围：1-10
+  # 建议：
+  #   - 大数据集：1-3 轮
+  #   - 小数据集：3-5 轮
+  #   - 过多会过拟合
+  num_train_epochs: 1
+  
+  # 学习率
+  # 说明：优化器的学习率
+  # 取值范围：1e-6 到 1e-4
+  # 推荐：
+  #   - 全量微调：1e-5 到 5e-5
+  #   - LoRA 微调：5e-5 到 1e-4
+  #   - QLoRA 微调：1e-4 到 2e-4
+  learning_rate: 5.0e-5
+  
+  # 日志记录步数
+  # 说明：每隔多少步记录一次日志（loss, lr 等）
+  # 建议：50-100 步
+  logging_steps: 50
+  
+  # 保存检查点步数
+  # 说明：每隔多少步保存一次模型
+  # 建议：根据训练总步数设置，保留 3-5 个检查点
+  # 示例：总步数 5000，设为 500 或 1000
+  save_steps: 500
+  
+  # 评估策略
+  # 可选值：no / steps / epoch
+  # 说明：
+  #   - no：不评估
+  #   - steps：每隔 eval_steps 评估一次
+  #   - epoch：每个 epoch 结束后评估
+  evaluation_strategy: "steps"
+  
+  # 评估步数
+  # 说明：当 evaluation_strategy="steps" 时生效
+  # 建议：与 save_steps 相同或其倍数
+  eval_steps: 500
+  
+  # 预热步数
+  # 说明：学习率从 0 线性增长到 learning_rate 的步数
+  # 取值范围：总步数的 5-10%
+  # 示例：总步数 5000，设为 100-500
+  warmup_steps: 100
+  
+  # 学习率调度器类型
+  # 可选值：linear / cosine / constant / constant_with_warmup
+  # 推荐：cosine（平滑衰减）
+  lr_scheduler_type: "cosine"
+  
+  # 混合精度训练
+  # 说明：使用 FP16 加速训练并降低显存
+  # 推荐：GPU 支持时启用（V100/A100/RTX 系列）
+  # 注意：某些 GPU（如 A100）建议用 bf16 代替 fp16
+  fp16: true
+  
+  # 实验追踪后端
+  # 说明：此处留空，由 trace 字段和脚本逻辑控制
+  # 脚本会根据 trace 字段自动设置为 ["wandb"] 或 ["swanlab"]
+  report_to: []
+  
+  # ------------------------------------------------------------
+  # 其他可选参数（按需取消注释）
+  # ------------------------------------------------------------
+  
+  # # BF16 混合精度（A100 推荐）
+  # bf16: false
+  
+  # # 最大梯度范数（梯度裁剪）
+  # max_grad_norm: 1.0
+  
+  # # 权重衰减（L2 正则化）
+  # weight_decay: 0.01
+  
+  # # Adam epsilon
+  # adam_epsilon: 1.0e-8
+  
+  # # 保存总检查点数限制
+  # save_total_limit: 3
+  
+  # # 加载最佳模型（训练结束时）
+  # load_best_model_at_end: true
+  
+  # # 最佳模型指标
+  # metric_for_best_model: "eval_loss"
+  
+  # # 是否降序排列（loss 用 false，accuracy 用 true）
+  # greater_is_better: false
+  
+  # # 数据加载器线程数
+  # dataloader_num_workers: 4
+  
+  # # 是否删除旧检查点
+  # save_safetensors: true
+  
+  # # DeepSpeed 配置文件路径（也可以在顶级 deepspeed 字段配置）
+  # # 建议使用顶级配置，此处仅作备用
+  # deepspeed: "config/self_model_config/deepspeed/ds_config.json"
+  
+  # # FSDP 配置（多 GPU 训练）
+  # fsdp: "full_shard auto_wrap"
+  # fsdp_config:
+  #   fsdp_offload_params: true
+  #   fsdp_state_dict_type: "FULL_STATE_DICT"

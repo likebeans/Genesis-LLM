@@ -1,0 +1,12 @@
+{
+  "name": "Baichuan2 Chat",
+  "messages": [
+    {"role": "system", "template": "<reserved_106>{system}"},
+    {"role": "user", "template": "<reserved_106>{content}"},
+    {"role": "assistant", "template": "<reserved_107>{content}"}
+  ],
+  "separator": "",
+  "stop_tokens": ["</s>"],
+  "bos_token": "<s>",
+  "eos_token": "</s>"
+}
