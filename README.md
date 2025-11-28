@@ -408,6 +408,25 @@ Apache License 2.0
 
 ---
 
+## 赞助
+
+如果这个项目对你有帮助，欢迎请作者喝杯咖啡 ☕
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center"><b>微信</b></td>
+      <td align="center"><b>支付宝</b></td>
+    </tr>
+    <tr>
+      <td><img src="assets/wechat_pay.png" width="200"></td>
+      <td><img src="assets/alipay.png" width="200"></td>
+    </tr>
+  </table>
+</div>
+
+---
+
 ## 致谢
 
 - [HuggingFace Transformers](https://github.com/huggingface/transformers)
