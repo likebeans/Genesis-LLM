@@ -2,16 +2,18 @@
 
 ## Project Overview
 
-**self-model-sop** is a comprehensive LLM training pipeline for Chinese/domain-specific model development. It covers the complete workflow from tokenizer expansion, data collection/processing, to supervised fine-tuning (SFT) and RLHF alignment using PEFT (LoRA/QLoRA) with Transformers.
+**Genesis-LLM** is a ready-to-use LLM training toolkit designed for Chinese/domain-specific model development. The goal is to help developers **reuse** existing scripts without writing from scratch, and to help beginners understand the full LLM training pipeline.
 
-**Tech Stack**: Python 3.10+, PyTorch 2.1+, Transformers, PEFT, SentencePiece, Datasets, Accelerate, WandB/SwanLab
+**Tech Stack**: Python 3.10+, PyTorch 2.1+, Transformers, PEFT, TRL, SentencePiece, Datasets, Accelerate, vLLM, WandB/SwanLab
 
 **Key Features**:
 - Tokenizer vocabulary expansion for Chinese/domain terms
 - HuggingFace dataset fetching and processing pipeline
 - Config-driven training (YAML-based)
 - PEFT support (LoRA/QLoRA) for efficient fine-tuning
+- RLHF alignment (DPO/PPO/GRPO)
 - Integrated experiment tracking (WandB/SwanLab)
+- Inference & deployment (vLLM, llama.cpp, AWQ/GPTQ quantization)
 
 ## Setup Commands
 
@@ -58,7 +60,7 @@ uv run python tokenizer/aux_tokenizer/extend_base_tokenizer.py \
   --config config/tokenizer_config/config.yaml
 ```
 
-**4. Fine-tuning**
+**4. Fine-tuning (SFT)**
 ```bash
 # Run supervised fine-tuning with LoRA
 uv run python self_model/fine_tuning/train_finetune.py \
@@ -66,10 +68,38 @@ uv run python self_model/fine_tuning/train_finetune.py \
   --trace swanlab
 ```
 
+**5. RLHF Alignment**
+```bash
+# DPO training
+uv run python self_model/rlhf/train_dpo.py \
+  --config config/self_model_config/rlhf.yaml
+
+# PPO/GRPO training (via VERL)
+uv run python self_model/rlhf/train_ppo.py \
+  --config config/self_model_config/rlhf.yaml
+```
+
+**6. Inference & Deployment**
+```bash
+# vLLM deployment
+cd inference/vllm && ./run_vllm.sh
+
+# AWQ quantization
+uv run python inference/quantize/awq_quantize.py \
+  --model_path /path/to/model \
+  --output_path /path/to/model-awq \
+  --bits 4
+
+# llama.cpp GGUF conversion
+uv run python inference/llama.cpp/convert_to_gguf.py \
+  --model_path /path/to/model \
+  --output_path /path/to/model.gguf
+```
+
 ## Project Structure
 
 ```
-self_model_sop/
+Genesis-LLM/
 ├── config/                      # All configuration files
 │   ├── model_config/           # HF mirror and model configs
 │   ├── self_model_config/      # Training configs (pretrain/finetune/rlhf)
@@ -239,4 +269,12 @@ Core dependencies (see `pyproject.toml`):
 
 **Tokenizer Expansion**:
 - Only append new tokens, never delete or reorder existing ones
-- Special tokens (`<|system|>`, `
+- Special tokens must maintain their original order
+- New tokens need CPT/SFT to acquire semantics
+
+**Inference & Deployment**:
+- vLLM for high-throughput production serving
+- llama.cpp for edge/CPU deployment
+- AWQ/GPTQ for 4-bit quantization (reduce VRAM by ~70%)
+
+**Repository**: https://github.com/likebeans/Genesis-LLM
